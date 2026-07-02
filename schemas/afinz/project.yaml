@@ -17,7 +17,7 @@ cleaning:
 
 batch:
   default_size: 2000
-  min_remainder: 500
+  remainder_threshold_percent: 50
   default_lote_num: 1
 
 output:
