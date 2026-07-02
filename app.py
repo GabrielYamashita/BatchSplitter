@@ -96,7 +96,7 @@ def render_mapping_preview(mapping: dict, schema: dict) -> None:
     unmapped = mapping.get("unmapped_columns", [])
 
     if unmapped:
-        with st.expander("Colunas não mapeadas no CSV", expanded=False):
+        with st.expander("Colunas mantidas sem alteração", expanded=False):
             st.write(unmapped)
 
 
