@@ -1,0 +1,10 @@
+id: override
+name: Override
+active: true
+
+output:
+  file_prefix: OVERRIDE
+
+fields:
+  nome:
+    enabled: false

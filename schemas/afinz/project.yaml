@@ -1,0 +1,48 @@
+id: afinz
+name: Afinz
+active: true
+
+input:
+  auto_detect_delimiter: true
+  delimiter_candidates: [";", ",", "|", "\t"]
+  encoding_fallbacks: ["utf-8", "utf-8-sig", "latin1"]
+  dtype: str
+
+cleaning:
+  drop_empty_rows: true
+  drop_empty_columns: true
+  drop_unnamed_columns: true
+  normalize_column_names: true
+  drop_unmapped_columns: true
+
+batch:
+  default_size: 2000
+  min_remainder: 500
+  default_lote_num: 1
+
+output:
+  delimiter: ";"
+  encoding: utf-8-sig
+  extension: csv
+  include_header: true
+  filename_pattern: "{prefix}_Lote{batch_num}_{lote_num}_{date}.csv"
+
+fields:
+  nome: # column name
+    required: true
+    output_name: nome
+    aliases:
+      - nome
+      - cliente
+      - nome_cliente
+      - name
+
+  telefone: # column name
+    required: true
+    output_name: TEL_DEEP
+    aliases:
+      - telefone
+      - celular
+      - tel
+      - phone
+      - tel_deep
