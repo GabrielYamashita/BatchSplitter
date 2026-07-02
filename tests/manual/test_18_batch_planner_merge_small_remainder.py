@@ -17,7 +17,7 @@ def main():
     runtime_config = {
         "batch_size": 1000,
         "remainder_threshold_percent": 50,
-        "lote_num": 88,
+        "batch_num": 5,
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
@@ -38,9 +38,13 @@ def main():
         1499,
     ]
 
-    assert plan[-1]["batch_num"] == 9
-    assert plan[-1]["lote_num"] == 96
-    assert plan[-1]["rows"] == 1499
+    assert plan[-1] == {
+        "batch_num": 5,
+        "file_num": 9,
+        "start": 8000,
+        "end": 9499,
+        "rows": 1499,
+    }
 
     print("Batch Planner Merge Small Remainder OK\n")
     pprint(plan)

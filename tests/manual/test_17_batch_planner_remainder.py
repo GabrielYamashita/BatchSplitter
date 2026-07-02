@@ -17,7 +17,7 @@ def main():
     runtime_config = {
         "batch_size": 1000,
         "remainder_threshold_percent": 50,
-        "lote_num": 88,
+        "batch_num": 5,
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
@@ -39,9 +39,13 @@ def main():
         500,
     ]
 
-    assert plan[-1]["batch_num"] == 10
-    assert plan[-1]["lote_num"] == 97
-    assert plan[-1]["rows"] == 500
+    assert plan[-1] == {
+        "batch_num": 5,
+        "file_num": 10,
+        "start": 9000,
+        "end": 9500,
+        "rows": 500,
+    }
 
     print("Batch Planner Remainder OK\n")
     pprint(plan)

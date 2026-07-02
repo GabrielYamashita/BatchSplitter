@@ -17,7 +17,7 @@ def main():
     runtime_config = {
         "batch_size": 1000,
         "remainder_threshold_percent": 50,
-        "lote_num": 88,
+        "batch_num": 5,
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
@@ -26,16 +26,16 @@ def main():
     assert all(batch["rows"] == 1000 for batch in plan)
 
     assert plan[0] == {
-        "batch_num": 1,
-        "lote_num": 88,
+        "batch_num": 5,
+        "file_num": 1,
         "start": 0,
         "end": 1000,
         "rows": 1000,
     }
 
     assert plan[-1] == {
-        "batch_num": 10,
-        "lote_num": 97,
+        "batch_num": 5,
+        "file_num": 10,
         "start": 9000,
         "end": 10000,
         "rows": 1000,

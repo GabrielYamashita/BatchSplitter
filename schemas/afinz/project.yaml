@@ -18,14 +18,14 @@ cleaning:
 batch:
   default_size: 2000
   remainder_threshold_percent: 50
-  default_lote_num: 1
+  default_batch_num: 1
 
 output:
   delimiter: ";"
   encoding: utf-8-sig
   extension: csv
   include_header: true
-  filename_pattern: "{prefix}_Lote{batch_num}_{lote_num}_{date}.csv"
+  filename_pattern: "{prefix}_Lote{batch_num}_{file_num}_{date}.csv"
 
 fields:
   nome: # column name

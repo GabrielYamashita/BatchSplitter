@@ -17,12 +17,14 @@ def main():
     runtime_config = {
         "batch_size": 1000,
         "remainder_threshold_percent": 30,
-        "lote_num": 1,
+        "batch_num": 7,
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
 
     rows = [batch["rows"] for batch in plan]
+
+    assert len(plan) == 9
 
     assert rows == [
         1000,
@@ -35,6 +37,14 @@ def main():
         1000,
         1299,
     ]
+
+    assert plan[-1] == {
+        "batch_num": 7,
+        "file_num": 9,
+        "start": 8000,
+        "end": 9299,
+        "rows": 1299,
+    }
 
     print("Batch Planner Below Custom Percent OK\n")
     pprint(plan)

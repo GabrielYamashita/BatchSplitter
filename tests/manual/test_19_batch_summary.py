@@ -18,7 +18,7 @@ def main():
     runtime_config = {
         "batch_size": 1000,
         "remainder_threshold_percent": 50,
-        "lote_num": 88,
+        "batch_num": 5,
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
@@ -27,6 +27,19 @@ def main():
     assert summary["summary"] == "9 Lotes de 1000 + 1 Lote de 500"
     assert summary["total_batches"] == 10
     assert summary["total_rows"] == 9500
+
+    assert summary["groups"] == [
+        {
+            "rows": 1000,
+            "count": 9,
+            "label": "9 Lotes de 1000",
+        },
+        {
+            "rows": 500,
+            "count": 1,
+            "label": "1 Lote de 500",
+        },
+    ]
 
     print("Batch Summary OK\n")
     pprint(summary)

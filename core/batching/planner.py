@@ -27,10 +27,10 @@ def get_batch_config(
         )
     )
 
-    lote_num_start = int(
+    batch_num = int(
         runtime_config.get(
-            "lote_num",
-            batch_config.get("default_lote_num", 1),
+            "batch_num",
+            batch_config.get("default_batch_num", 1),
         )
     )
 
@@ -40,13 +40,13 @@ def get_batch_config(
     if remainder_threshold_percent < 0 or remainder_threshold_percent > 100:
         raise ValueError("remainder_threshold_percent must be between 0 and 100.")
 
-    if lote_num_start <= 0:
-        raise ValueError("lote_num must be greater than zero.")
+    if batch_num <= 0:
+        raise ValueError("batch_num must be greater than zero.")
 
     return {
         "batch_size": batch_size,
         "remainder_threshold_percent": remainder_threshold_percent,
-        "lote_num_start": lote_num_start,
+        "batch_num": batch_num,
     }
 
 
@@ -72,7 +72,7 @@ def build_batch_plan_from_total(
 
     batch_size = int(config["batch_size"])
     remainder_threshold_percent = float(config["remainder_threshold_percent"])
-    lote_num_start = int(config["lote_num_start"])
+    batch_num = int(config["batch_num"])
 
     if total_rows < 0:
         raise ValueError("total_rows cannot be negative.")
@@ -83,7 +83,7 @@ def build_batch_plan_from_total(
     batches: list[dict[str, int]] = []
 
     start = 0
-    batch_num = 1
+    file_num = 1
 
     while start < total_rows:
         end = min(start + batch_size, total_rows)
@@ -99,7 +99,7 @@ def build_batch_plan_from_total(
         batches.append(
             {
                 "batch_num": batch_num,
-                "lote_num": lote_num_start + batch_num - 1,
+                "file_num": file_num,
                 "start": start,
                 "end": end,
                 "rows": end - start,
@@ -107,7 +107,7 @@ def build_batch_plan_from_total(
         )
 
         start = end
-        batch_num += 1
+        file_num += 1
 
     return batches
 
