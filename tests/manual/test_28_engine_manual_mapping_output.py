@@ -56,12 +56,16 @@ def main():
     assert output_result["validation"]["valid"] is True
 
     df_output = output_result["df_output"]
+    output_report = output_result["output_result"]["report"]
 
-    assert list(df_output.columns) == ["nome", "TEL_DEEP"]
+    assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
     assert len(df_output) == 2
+
+    assert output_report["kept_unmapped_columns"] == ["CPF"]
 
     assert df_output.loc[0, "nome"] == "Gabriel"
     assert df_output.loc[0, "TEL_DEEP"] == "011999999999"
+    assert df_output.loc[0, "CPF"] == "01234567890"
 
     print("Engine Manual Mapping Output OK\n")
 
@@ -69,7 +73,7 @@ def main():
     pprint(output_result["mapping"])
 
     print("\nOutput report:")
-    pprint(output_result["output_result"]["report"])
+    pprint(output_report)
 
     print("\nOutput preview:")
     print(output_result["output_preview"]["sample"])

@@ -31,10 +31,11 @@ def main():
     df_output = result["df"]
     report = result["report"]
 
-    assert list(df_output.columns) == ["TEL_DEEP"]
+    assert list(df_output.columns) == ["nome", "TEL_DEEP"]
 
-    assert "nome" in report["dropped_unmapped_columns"]
+    assert report["kept_unmapped_columns"] == ["nome"]
 
+    assert df_output.loc[0, "nome"] == "Gabriel"
     assert df_output.loc[0, "TEL_DEEP"] == "011999999999"
 
     print("Output Builder Override OK\n")

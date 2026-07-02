@@ -33,18 +33,24 @@ def main():
     df_output = result["df"]
     report = result["report"]
 
-    assert list(df_output.columns) == ["TEL_DEEP", "nome"]
+    assert list(df_output.columns) == ["TEL_DEEP", "nome", "CPF"]
     assert len(df_output) == 2
 
     assert df_output.loc[0, "TEL_DEEP"] == "011999999999"
     assert df_output.loc[0, "nome"] == "Gabriel"
+    assert df_output.loc[0, "CPF"] == "01234567890"
 
-    assert "CPF" in report["dropped_unmapped_columns"]
+    assert report["renamed_columns"] == {
+        "Celular": "TEL_DEEP",
+        "Nome Cliente": "nome",
+    }
+
+    assert report["kept_unmapped_columns"] == ["CPF"]
 
     preview = build_dataframe_preview(df_output, max_rows=1)
 
     assert preview["rows"] == 2
-    assert preview["columns"] == ["TEL_DEEP", "nome"]
+    assert preview["columns"] == ["TEL_DEEP", "nome", "CPF"]
     assert len(preview["sample"]) == 1
 
     print("Output Builder CP Preventivo OK\n")

@@ -10,7 +10,7 @@ def main():
     )
 
     assert schema["id"] == "cp_preventivo_03"
-    assert schema["name"] == "CP Preventivo 03"
+    assert schema["name"] == "cp_preventivo_03"
 
     assert schema["_meta"]["project_id"] == "afinz"
     assert schema["_meta"]["template_id"] == "cp_preventivo_03"

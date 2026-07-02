@@ -39,9 +39,11 @@ def main():
     )
 
     df_output = output_result["df"]
+    output_report = output_result["report"]
 
-    assert list(df_output.columns) == ["nome", "TEL_DEEP"]
+    assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
     assert len(df_output) == 2501
+    assert output_report["kept_unmapped_columns"] == ["CPF"]
 
     runtime_config = {
         "batch_size": 1000,
@@ -90,7 +92,7 @@ def main():
         )
 
         assert len(third_file) == 501
-        assert list(third_file.columns) == ["nome", "TEL_DEEP"]
+        assert list(third_file.columns) == ["nome", "TEL_DEEP", "CPF"]
 
     print("ZIP Exporter Real Flow OK\n")
 

@@ -4,6 +4,8 @@ import io
 import zipfile
 from pprint import pprint
 
+import pandas as pd
+
 from core.engine import (
     apply_mapping_and_build_output,
     generate_zip,
@@ -51,9 +53,11 @@ def main():
     assert output_result["success"] is True
 
     df_output = output_result["df_output"]
+    output_report = output_result["output_result"]["report"]
 
-    assert list(df_output.columns) == ["nome", "TEL_DEEP"]
+    assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
     assert len(df_output) == 2501
+    assert output_report["kept_unmapped_columns"] == ["CPF"]
 
     runtime_config = {
         "batch_size": 1000,
@@ -99,6 +103,17 @@ def main():
             "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
             "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
         ]
+
+        first_file = pd.read_csv(
+            io.BytesIO(zip_file.read(names[0])),
+            sep=";",
+            dtype=str,
+            keep_default_na=False,
+        )
+
+        assert list(first_file.columns) == ["nome", "TEL_DEEP", "CPF"]
+        assert len(first_file) == 1000
+
     print("Engine Full Flow OK\n")
 
     print("Batch summary:")

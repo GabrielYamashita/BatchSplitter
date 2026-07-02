@@ -14,7 +14,7 @@ def main():
     assert project["name"] == "Afinz"
 
     assert template["id"] == "cp_preventivo_03"
-    assert template["name"] == "CP Preventivo 03"
+    assert template["name"] == "cp_preventivo_03"
 
     print("Loader OK\n")
 

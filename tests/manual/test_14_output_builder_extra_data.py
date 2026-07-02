@@ -41,13 +41,15 @@ def main():
         "valor_parcela",
         "nome",
         "data_vencimento",
+        "observacao",
     ]
 
-    assert "observacao" in report["dropped_unmapped_columns"]
+    assert report["kept_unmapped_columns"] == ["observacao"]
 
     assert df_output.loc[0, "TEL_DEEP"] == "011999999999"
     assert df_output.loc[0, "valor_parcela"] == "150.00"
     assert df_output.loc[0, "nome"] == "Gabriel"
+    assert df_output.loc[0, "observacao"] == "A"
 
     print("Output Builder Extra Data OK\n")
 

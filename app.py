@@ -141,10 +141,23 @@ def build_manual_mapping_ui(
 
 def render_batch_plan(batch_plan: list[dict]) -> None:
     if not batch_plan:
-        st.warning("No batches generated.")
+        st.warning("Nenhum lote gerado.")
         return
 
-    st.dataframe(batch_plan, use_container_width=True)
+    display_rows = []
+
+    for batch in batch_plan:
+        display_rows.append(
+            {
+                "Lote": f"{batch['batch_num']:02d}",
+                "Arquivo": f"{batch['file_num']:02d}",
+                "Qtd. Clientes": batch["rows"],
+                "Linha Inicial": batch["start"] + 1,
+                "Linha Final": batch["end"],
+            }
+        )
+
+    st.dataframe(display_rows, use_container_width=True)
 
 
 def main() -> None:
