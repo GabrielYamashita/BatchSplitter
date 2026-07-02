@@ -16,19 +16,6 @@ def get_active_fields(schema: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def build_source_column_to_field(mapping: dict[str, Any]) -> dict[str, str]:
-    """
-    Converts:
-    {
-        "nome": "Nome Cliente",
-        "telefone": "Celular"
-    }
-
-    Into:
-    {
-        "Nome Cliente": "nome",
-        "Celular": "telefone"
-    }
-    """
     mapped = mapping.get("mapped", {})
 
     return {source_column: field_key for field_key, source_column in mapped.items()}
@@ -45,20 +32,15 @@ def build_output_dataframe(
     Rules:
     - Output column order follows the uploaded CSV order.
     - Mapped columns are renamed to field.output_name.
-    - Unmapped columns are dropped if cleaning.drop_unmapped_columns is true.
-    - Fields with enabled:false should already be removed by resolver, but are ignored here too.
+    - Unmapped columns are kept with their original names.
+    - Fields with enabled:false are not mapped, but raw CSV columns are still kept.
     """
     fields = get_active_fields(schema)
-    cleaning = schema.get("cleaning", {})
-
-    drop_unmapped_columns = cleaning.get("drop_unmapped_columns", True)
-
     source_column_to_field = build_source_column_to_field(mapping)
 
     output = pd.DataFrame()
 
     renamed_columns: dict[str, str] = {}
-    dropped_unmapped_columns: list[str] = []
     kept_unmapped_columns: list[str] = []
 
     for source_column in df.columns:
@@ -82,10 +64,6 @@ def build_output_dataframe(
             renamed_columns[source_column] = output_name
             continue
 
-        if drop_unmapped_columns:
-            dropped_unmapped_columns.append(source_column)
-            continue
-
         if source_column in output.columns:
             raise ValueError(f"Duplicate output column generated: {source_column}")
 
@@ -98,7 +76,6 @@ def build_output_dataframe(
             "input_columns": list(df.columns),
             "output_columns": list(output.columns),
             "renamed_columns": renamed_columns,
-            "dropped_unmapped_columns": dropped_unmapped_columns,
             "kept_unmapped_columns": kept_unmapped_columns,
             "input_rows": len(df),
             "output_rows": len(output),
