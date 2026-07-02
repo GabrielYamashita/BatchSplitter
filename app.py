@@ -21,53 +21,48 @@ def default_tomorrow_ddmm() -> str:
 
 
 def build_project_options(projects: list[dict]) -> dict[str, dict]:
-    return {
-        f"{project['project_name']} ({project['project_id']})": project
-        for project in projects
-    }
+    return {f"{project['project_name']}": project for project in projects}
 
 
 def build_template_options(templates: list[dict]) -> dict[str, dict]:
-    return {
-        f"{template['template_name']} ({template['template_id']})": template
-        for template in templates
-    }
+    return {f"{template['template_name']}": template for template in templates}
 
 
 def render_schema_preview(schema_preview: dict) -> None:
-    with st.expander("Resolved schema preview", expanded=False):
-        col1, col2, col3 = st.columns(3)
+    with st.expander("Visualização do Template Escolhido", expanded=False):
+        col1, col2 = st.columns(2)
 
         with col1:
-            st.metric("Project", schema_preview.get("project_name", "-"))
+            st.metric("Projeto", schema_preview.get("project_name", "-"))
 
         with col2:
             st.metric("Template", schema_preview.get("template_name", "-"))
 
-        with col3:
-            st.metric(
-                "File prefix", schema_preview.get("output", {}).get("file_prefix", "-")
-            )
+        # with col3:
+        #     st.metric(
+        #         "Prefixo do Lote",
+        #         schema_preview.get("output", {}).get("file_prefix", "-"),
+        #     )
 
-        st.subheader("Fields")
+        st.subheader("Campos do Template")
 
         fields_preview = [
             {
-                "field": field["field"],
-                "output_name": field["output_name"],
-                "required": field["required"],
-                "aliases": ", ".join(field.get("aliases", [])),
+                "Coluna de Entrada": field["field"],
+                "Coluna de Saída": field["output_name"],
+                "Obrigatório": field["required"],
+                "Sinônimos": ", ".join(field.get("aliases", [])),
             }
             for field in schema_preview.get("fields", [])
         ]
 
         st.dataframe(fields_preview, use_container_width=True)
 
-        st.subheader("Batch config")
-        st.json(schema_preview.get("batch", {}))
+        # st.subheader("Batch config")
+        # st.json(schema_preview.get("batch", {}))
 
-        st.subheader("Output config")
-        st.json(schema_preview.get("output", {}))
+        # st.subheader("Output config")
+        # st.json(schema_preview.get("output", {}))
 
 
 def render_mapping_preview(mapping: dict, schema: dict) -> None:
@@ -118,11 +113,11 @@ def build_manual_mapping_ui(
     if not missing_required:
         return manual_mapping
 
-    st.subheader("Manual mapping")
+    st.subheader("Mapeamento Manual")
 
     st.warning(
-        "Some required fields were not recognized automatically. "
-        "Select the correct CSV column for each missing field."
+        "Alguns campos obrigatórios não foram reconhecidos automaticamente. "
+        "Selecione a coluna correta do CSV para cada campo faltante."
     )
 
     options = [""] + csv_columns
@@ -160,13 +155,13 @@ def main() -> None:
     )
 
     st.title("📦 Batch Splitter")
-    st.caption("CSV batch splitter using project/template schemas.")
+    st.caption("Separador de bases de acionamento - 1Digital")
 
     # -----------------------------
     # Sidebar: project/template
     # -----------------------------
 
-    st.sidebar.header("1. Template selection")
+    st.sidebar.header("1. Seleção do Template")
 
     projects = list_projects(SCHEMA_ROOT)
 
@@ -177,7 +172,7 @@ def main() -> None:
     project_options = build_project_options(projects)
 
     selected_project_label = st.sidebar.selectbox(
-        "Project",
+        "Projeto",
         options=list(project_options.keys()),
     )
 
@@ -217,31 +212,31 @@ def main() -> None:
     # Sidebar: runtime config
     # -----------------------------
 
-    st.sidebar.header("2. Batch config")
+    st.sidebar.header("2. Configurações do Lote")
 
     default_batch_size = int(schema.get("batch", {}).get("default_size", 2000))
-    default_threshold = float(
+    default_threshold = int(
         schema.get("batch", {}).get("remainder_threshold_percent", 50)
     )
     default_batch_num = int(schema.get("batch", {}).get("default_batch_num", 1))
 
     batch_size = st.sidebar.number_input(
-        "Clients per file",
+        "Clientes por Lote",
         min_value=1,
         value=default_batch_size,
         step=100,
     )
 
     remainder_threshold_percent = st.sidebar.number_input(
-        "Remainder threshold (%)",
-        min_value=0.0,
-        max_value=100.0,
+        "Limite de Remanescente (%)",
+        min_value=0,
+        max_value=100,
         value=default_threshold,
-        step=1.0,
+        step=5,
     )
 
     batch_num = st.sidebar.number_input(
-        "Batch num",
+        "Número do Lote",
         min_value=1,
         value=default_batch_num,
         step=1,
@@ -267,12 +262,12 @@ def main() -> None:
     st.header("1. Upload CSV")
 
     uploaded_file = st.file_uploader(
-        "Upload client CSV",
+        "Upload da Base de Acionamento CSV",
         type=["csv"],
     )
 
     if uploaded_file is None:
-        st.info("Upload a CSV file to continue.")
+        st.info("Upload um arquivo CSV para continuar.")
         st.stop()
 
     upload_result = prepare_uploaded_file(
@@ -290,27 +285,25 @@ def main() -> None:
     # -----------------------------
 
     st.divider()
-    st.header("2. Input preview")
+    st.header("2. Visualização de Input")
 
     read_info = upload_result["read_info"]
     cleaning_report = upload_result["cleaning_report"]
     input_preview = upload_result["input_preview"]
+    # with st.expander("Visualização do input", expanded=True):
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.metric("Delimiter", read_info["delimiter"])
+        st.metric("Linhas", input_preview["rows"])
 
     with col2:
-        st.metric("Encoding", read_info["encoding"])
+        st.metric("Colunas", input_preview["total_columns"])
 
     with col3:
-        st.metric("Rows", input_preview["rows"])
+        st.metric("Separador", read_info["delimiter"])
 
-    with col4:
-        st.metric("Columns", input_preview["total_columns"])
-
-    with st.expander("Cleaning report", expanded=False):
+    with st.expander("Relatório de Limpeza", expanded=False):
         st.json(cleaning_report)
 
     st.dataframe(input_preview["sample"], use_container_width=True)
@@ -320,7 +313,7 @@ def main() -> None:
     # -----------------------------
 
     st.divider()
-    st.header("3. Column mapping")
+    st.header("3. Mapeamento de Colunas")
 
     render_mapping_preview(mapping, schema)
     render_validation(validation)
@@ -353,15 +346,15 @@ def main() -> None:
     output_report = output_result["output_result"]["report"]
 
     st.divider()
-    st.header("4. Final file preview")
+    st.header("4. Visualização do Arquivo de Saída")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Output rows", output_preview["rows"])
+        st.metric("Linhas de Saída", output_preview["rows"])
 
     with col2:
-        st.metric("Output columns", output_preview["total_columns"])
+        st.metric("Colunas de Saída", output_preview["total_columns"])
 
     with st.expander("Output report", expanded=False):
         st.json(output_report)
@@ -401,9 +394,9 @@ def main() -> None:
     # -----------------------------
 
     st.divider()
-    st.header("6. Generate ZIP")
+    st.header("6. Gerar Lotes de Acionamento")
 
-    if st.button("Generate ZIP", type="primary"):
+    if st.button("Gerar Lotes", type="primary"):
         zip_result = generate_zip(
             df_output=df_output,
             batch_plan=batch_plan,
@@ -416,9 +409,9 @@ def main() -> None:
     zip_result = st.session_state.get("zip_result")
 
     if zip_result:
-        st.success("ZIP generated successfully.")
+        st.success("Lotes gerados com sucesso.")
 
-        st.subheader("Generated files")
+        st.subheader("Arquivos gerados")
         st.dataframe(zip_result["files"], use_container_width=True)
 
         project_name = schema.get("_meta", {}).get("project_name", "project")
@@ -427,7 +420,7 @@ def main() -> None:
         zip_filename = f"{project_name}_{template_id}_{date}.zip"
 
         st.download_button(
-            label="Download ZIP",
+            label="Download Lotes",
             data=zip_result["zip_bytes"],
             file_name=zip_filename,
             mime="application/zip",
