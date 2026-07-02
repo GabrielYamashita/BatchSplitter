@@ -46,13 +46,13 @@ def main():
 
     assert files == [
         {
-            "filename": "CP_PREVENTIVO_03_Lote05_01_0307.csv",
+            "filename": "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
             "rows": 2,
             "batch_num": 5,
             "file_num": 1,
         },
         {
-            "filename": "CP_PREVENTIVO_03_Lote05_02_0307.csv",
+            "filename": "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
             "rows": 1,
             "batch_num": 5,
             "file_num": 2,
@@ -63,8 +63,8 @@ def main():
         names = zip_file.namelist()
 
         assert names == [
-            "CP_PREVENTIVO_03_Lote05_01_0307.csv",
-            "CP_PREVENTIVO_03_Lote05_02_0307.csv",
+            "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
+            "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
         ]
 
         first_file_bytes = zip_file.read(names[0])

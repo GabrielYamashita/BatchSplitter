@@ -35,10 +35,12 @@ def render_filename(
         "{prefix}_Lote{batch_num}_{file_num}_{date}.csv",
     )
 
+    project_name = schema.get("_meta", {}).get("project_name", schema.get("name", ""))
     prefix = output_config.get("file_prefix", schema.get("id", "batch"))
     date = runtime_config.get("date", "")
 
     filename = pattern.format(
+        name=project_name,
         prefix=prefix,
         batch_num=format_number(batch["batch_num"]),
         file_num=format_number(batch["file_num"]),

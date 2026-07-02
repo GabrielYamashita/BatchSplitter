@@ -25,7 +25,7 @@ output:
   encoding: utf-8-sig
   extension: csv
   include_header: true
-  filename_pattern: "{prefix}_Lote{batch_num}_{file_num}_{date}.csv"
+  filename_pattern: "{name}_{prefix}_Lote{batch_num}_{file_num}_{date}.csv"
 
 fields:
   nome: # column name

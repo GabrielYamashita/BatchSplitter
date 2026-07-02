@@ -84,9 +84,9 @@ def main():
     zip_bytes = zip_result["zip_bytes"]
 
     assert [file["filename"] for file in files] == [
-        "CP_PREVENTIVO_03_Lote05_01_0307.csv",
-        "CP_PREVENTIVO_03_Lote05_02_0307.csv",
-        "CP_PREVENTIVO_03_Lote05_03_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
     ]
 
     assert [file["rows"] for file in files] == [1000, 1000, 501]
@@ -95,11 +95,10 @@ def main():
         names = zip_file.namelist()
 
         assert names == [
-            "CP_PREVENTIVO_03_Lote05_01_0307.csv",
-            "CP_PREVENTIVO_03_Lote05_02_0307.csv",
-            "CP_PREVENTIVO_03_Lote05_03_0307.csv",
+            "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
+            "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
+            "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
         ]
-
     print("Engine Full Flow OK\n")
 
     print("Batch summary:")

@@ -25,9 +25,9 @@ def main():
     filenames = [render_filename(schema, batch, runtime_config) for batch in plan]
 
     assert filenames == [
-        "CP_PREVENTIVO_03_Lote05_01_0307.csv",
-        "CP_PREVENTIVO_03_Lote05_02_0307.csv",
-        "CP_PREVENTIVO_03_Lote05_03_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
+        "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
     ]
 
     print("Filename Renderer OK\n")
