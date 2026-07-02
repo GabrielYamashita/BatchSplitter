@@ -43,6 +43,5 @@ fields:
     aliases:
       - telefone
       - celular
-      - tel
       - phone
       - tel_deep

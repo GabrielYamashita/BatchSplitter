@@ -11,13 +11,33 @@ from core.engine import (
     prepare_template,
     prepare_uploaded_file,
 )
+from core.export.zip_exporter import render_filename
 from core.schemas.discovery import list_projects, list_templates
 
 SCHEMA_ROOT = "schemas"
 
 
-def default_tomorrow_ddmm() -> str:
-    return (datetime.now() + timedelta(days=1)).strftime("%d%m")
+def default_tomorrow_date():
+    return (datetime.now() + timedelta(days=1)).date()
+
+
+def format_date_ddmm(value) -> str:
+    return value.strftime("%d%m")
+
+
+def validate_runtime_config(runtime_config: dict) -> list[str]:
+    errors = []
+
+    if runtime_config["batch_size"] <= 0:
+        errors.append("Clientes por lote deve ser maior que zero.")
+
+    if runtime_config["batch_num"] <= 0:
+        errors.append("Número do lote deve ser maior que zero.")
+
+    if not 0 <= runtime_config["remainder_threshold_percent"] <= 100:
+        errors.append("Limite de remanescente deve estar entre 0 e 100.")
+
+    return errors
 
 
 def build_project_options(projects: list[dict]) -> dict[str, dict]:
@@ -38,12 +58,6 @@ def render_schema_preview(schema_preview: dict) -> None:
         with col2:
             st.metric("Template", schema_preview.get("template_name", "-"))
 
-        # with col3:
-        #     st.metric(
-        #         "Prefixo do Lote",
-        #         schema_preview.get("output", {}).get("file_prefix", "-"),
-        #     )
-
         st.subheader("Campos do Template")
 
         fields_preview = [
@@ -58,12 +72,6 @@ def render_schema_preview(schema_preview: dict) -> None:
 
         st.dataframe(fields_preview, use_container_width=True)
 
-        # st.subheader("Batch config")
-        # st.json(schema_preview.get("batch", {}))
-
-        # st.subheader("Output config")
-        # st.json(schema_preview.get("output", {}))
-
 
 def render_mapping_preview(mapping: dict, schema: dict) -> None:
     mapped_rows = []
@@ -73,91 +81,139 @@ def render_mapping_preview(mapping: dict, schema: dict) -> None:
 
         mapped_rows.append(
             {
-                "field": field,
-                "csv_column": csv_column,
-                "output_name": field_config.get("output_name"),
-                "required": field_config.get("required", False),
+                "Campo": field,
+                "Coluna no CSV": csv_column,
+                "Coluna de Saída": field_config.get("output_name"),
+                "Obrigatório": field_config.get("required", False),
             }
         )
 
     if mapped_rows:
         st.dataframe(mapped_rows, use_container_width=True)
     else:
-        st.warning("No fields were mapped automatically.")
+        st.warning("Nenhum campo foi mapeado automaticamente.")
 
     unmapped = mapping.get("unmapped_columns", [])
 
     if unmapped:
-        with st.expander("Unmapped CSV columns", expanded=False):
+        with st.expander("Colunas não mapeadas no CSV", expanded=False):
             st.write(unmapped)
 
 
 def render_validation(validation: dict) -> None:
     if validation.get("valid"):
-        st.success("Mapping is valid.")
+        st.success("Mapeamento válido.")
         return
 
-    st.error("Mapping has errors.")
+    st.error("O mapeamento possui erros.")
 
-    with st.expander("Validation errors", expanded=True):
+    with st.expander("Erros de validação", expanded=True):
         st.json(validation.get("errors", []))
 
 
 def build_manual_mapping_ui(
-    missing_required: list[str],
+    mapping: dict,
+    validation: dict,
     schema: dict,
     csv_columns: list[str],
 ) -> dict[str, str]:
     manual_mapping = {}
 
-    if not missing_required:
+    if validation.get("valid"):
+        return manual_mapping
+
+    fields = {
+        field_key: field_config
+        for field_key, field_config in schema.get("fields", {}).items()
+        if field_config.get("enabled", True) is not False
+    }
+
+    if not fields:
         return manual_mapping
 
     st.subheader("Mapeamento Manual")
 
     st.warning(
-        "Alguns campos obrigatórios não foram reconhecidos automaticamente. "
-        "Selecione a coluna correta do CSV para cada campo faltante."
+        "O mapeamento automático possui erros. "
+        "Revise os campos abaixo e selecione a coluna correta do CSV."
     )
 
     options = [""] + csv_columns
 
-    for field in missing_required:
-        aliases = schema.get("fields", {}).get(field, {}).get("aliases", [])
+    for field_key, field_config in fields.items():
+        current_column = mapping.get("mapped", {}).get(field_key, "")
+        output_name = field_config.get("output_name", field_key)
+        required = field_config.get("required", False)
+        aliases = field_config.get("aliases", [])
 
-        st.caption(f"Expected aliases for `{field}`: {', '.join(aliases)}")
+        label = f"{field_key} → {output_name}"
+
+        if required:
+            label += " *"
+
+        if current_column in options:
+            default_index = options.index(current_column)
+        else:
+            default_index = 0
 
         selected_column = st.selectbox(
-            label=f"Map field `{field}` to CSV column",
+            label=label,
             options=options,
-            key=f"manual_mapping_{field}",
+            index=default_index,
+            key=f"manual_mapping_{field_key}",
+            help=f"Sinônimos esperados: {', '.join(aliases)}",
         )
 
         if selected_column:
-            manual_mapping[field] = selected_column
+            manual_mapping[field_key] = selected_column
 
     return manual_mapping
 
 
-def render_batch_plan(batch_plan: list[dict]) -> None:
+def render_filename_preview(
+    schema: dict,
+    batch_plan: list[dict],
+    runtime_config: dict,
+) -> None:
     if not batch_plan:
-        st.warning("Nenhum lote gerado.")
+        st.warning("Nenhum arquivo previsto.")
+        return
+
+    preview_files = [
+        {
+            "Arquivo": render_filename(schema, batch, runtime_config),
+            "Qtd. Clientes": batch["rows"],
+        }
+        for batch in batch_plan
+    ]
+
+    st.dataframe(preview_files, use_container_width=True)
+
+
+def render_generated_files(files: list[dict]) -> None:
+    if not files:
+        st.warning("Nenhum arquivo gerado.")
         return
 
     display_rows = []
 
-    for batch in batch_plan:
+    for file in files:
         display_rows.append(
             {
-                "Lote": f"{batch['batch_num']:02d}",
-                "Arquivo": f"{batch['file_num']:02d}",
-                "Qtd. Clientes": batch["rows"],
-                "Linha Inicial": batch["start"] + 1,
-                "Linha Final": batch["end"],
+                "Arquivo": file["filename"],
+                "Qtd. Clientes": file["rows"],
+                "Lote": f"{file['batch_num']:02d}",
+                "Nº Arquivo": f"{file['file_num']:02d}",
             }
         )
 
     st.dataframe(display_rows, use_container_width=True)
+
+
+def clear_zip_if_generation_changed(generation_key: dict) -> None:
+    if st.session_state.get("generation_key") != generation_key:
+        st.session_state.pop("zip_result", None)
+        st.session_state["generation_key"] = generation_key
 
 
 def main() -> None:
@@ -179,7 +235,7 @@ def main() -> None:
     projects = list_projects(SCHEMA_ROOT)
 
     if not projects:
-        st.error("No active projects found in schemas/.")
+        st.error("Nenhum projeto ativo encontrado em schemas/.")
         st.stop()
 
     project_options = build_project_options(projects)
@@ -198,7 +254,8 @@ def main() -> None:
 
     if not templates:
         st.error(
-            f"No active templates found for project: {selected_project['project_name']}"
+            f"Nenhum template ativo encontrado para o projeto: "
+            f"{selected_project['project_name']}"
         )
         st.stop()
 
@@ -255,11 +312,13 @@ def main() -> None:
         step=1,
     )
 
-    date = st.sidebar.text_input(
-        "Date (DDMM)",
-        value=default_tomorrow_ddmm(),
-        max_chars=4,
+    selected_date = st.sidebar.date_input(
+        "Data do Lote",
+        value=default_tomorrow_date(),
+        format="DD/MM/YYYY",
     )
+
+    date = format_date_ddmm(selected_date)
 
     runtime_config = {
         "batch_size": int(batch_size),
@@ -268,11 +327,17 @@ def main() -> None:
         "date": date,
     }
 
+    runtime_errors = validate_runtime_config(runtime_config)
+
+    if runtime_errors:
+        for error in runtime_errors:
+            st.sidebar.error(error)
+
     # -----------------------------
     # Upload
     # -----------------------------
 
-    st.header("1. Upload CSV")
+    st.header("1. Upload da Base")
 
     uploaded_file = st.file_uploader(
         "Upload da Base de Acionamento CSV",
@@ -283,11 +348,16 @@ def main() -> None:
         st.info("Upload um arquivo CSV para continuar.")
         st.stop()
 
-    upload_result = prepare_uploaded_file(
-        uploaded_file=uploaded_file,
-        schema=schema,
-        preview_rows=10,
-    )
+    try:
+        upload_result = prepare_uploaded_file(
+            uploaded_file=uploaded_file,
+            schema=schema,
+            preview_rows=10,
+        )
+    except Exception as error:
+        st.error("Não foi possível processar o arquivo enviado.")
+        st.caption(str(error))
+        st.stop()
 
     df_clean = upload_result["df_clean"]
     mapping = upload_result["mapping"]
@@ -303,7 +373,6 @@ def main() -> None:
     read_info = upload_result["read_info"]
     cleaning_report = upload_result["cleaning_report"]
     input_preview = upload_result["input_preview"]
-    # with st.expander("Visualização do input", expanded=True):
 
     col1, col2, col3 = st.columns(3)
 
@@ -333,8 +402,14 @@ def main() -> None:
 
     csv_columns = list(df_clean.columns)
 
+    # manual_mapping = build_manual_mapping_ui(
+    #     missing_required=mapping.get("missing_required", []),
+    #     schema=schema,
+    #     csv_columns=csv_columns,
+    # )
     manual_mapping = build_manual_mapping_ui(
-        missing_required=mapping.get("missing_required", []),
+        mapping=mapping,
+        validation=validation,
         schema=schema,
         csv_columns=csv_columns,
     )
@@ -352,6 +427,11 @@ def main() -> None:
     )
 
     if not output_result["success"]:
+        st.error("O mapeamento final ainda possui erros.")
+
+        with st.expander("Erros do mapeamento final", expanded=True):
+            st.json(output_result["validation"].get("errors", []))
+
         st.stop()
 
     df_output = output_result["df_output"]
@@ -369,7 +449,7 @@ def main() -> None:
     with col2:
         st.metric("Colunas de Saída", output_preview["total_columns"])
 
-    with st.expander("Output report", expanded=False):
+    with st.expander("Relatório de Saída", expanded=False):
         st.json(output_report)
 
     st.dataframe(output_preview["sample"], use_container_width=True)
@@ -379,7 +459,7 @@ def main() -> None:
     # -----------------------------
 
     st.divider()
-    st.header("5. Batch preview")
+    st.header("5. Relatório de Lotes")
 
     batch_result = prepare_batches(
         df_output=df_output,
@@ -395,12 +475,32 @@ def main() -> None:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Total batches", batch_summary["total_batches"])
+        st.metric("Arquivos Totais", batch_summary["total_batches"])
 
     with col2:
-        st.metric("Total rows", batch_summary["total_rows"])
+        st.metric("Linhas Totais", batch_summary["total_rows"])
 
-    render_batch_plan(batch_plan)
+    render_filename_preview(schema, batch_plan, runtime_config)
+
+    # -----------------------------
+    # ZIP state safety
+    # -----------------------------
+
+    generation_key = {
+        "project_id": selected_project["project_id"],
+        "template_id": selected_template["template_id"],
+        "uploaded_file_name": uploaded_file.name,
+        "uploaded_file_size": uploaded_file.size,
+        "batch_size": runtime_config["batch_size"],
+        "remainder_threshold_percent": runtime_config["remainder_threshold_percent"],
+        "batch_num": runtime_config["batch_num"],
+        "date": runtime_config["date"],
+        "manual_mapping": tuple(sorted(manual_mapping.items())),
+        "output_columns": tuple(df_output.columns),
+        "output_rows": len(df_output),
+    }
+
+    clear_zip_if_generation_changed(generation_key)
 
     # -----------------------------
     # ZIP generation
@@ -409,15 +509,25 @@ def main() -> None:
     st.divider()
     st.header("6. Gerar Lotes de Acionamento")
 
-    if st.button("Gerar Lotes", type="primary"):
-        zip_result = generate_zip(
-            df_output=df_output,
-            batch_plan=batch_plan,
-            schema=schema,
-            runtime_config=runtime_config,
-        )
+    can_generate = not runtime_errors
 
-        st.session_state["zip_result"] = zip_result
+    if runtime_errors:
+        st.warning("Corrija as configurações do lote antes de gerar os arquivos.")
+
+    if st.button("Gerar Lotes", type="primary", disabled=not can_generate):
+        try:
+            zip_result = generate_zip(
+                df_output=df_output,
+                batch_plan=batch_plan,
+                schema=schema,
+                runtime_config=runtime_config,
+            )
+
+            st.session_state["zip_result"] = zip_result
+
+        except Exception as error:
+            st.error("Não foi possível gerar os lotes.")
+            st.caption(str(error))
 
     zip_result = st.session_state.get("zip_result")
 
@@ -425,12 +535,12 @@ def main() -> None:
         st.success("Lotes gerados com sucesso.")
 
         st.subheader("Arquivos gerados")
-        st.dataframe(zip_result["files"], use_container_width=True)
+        render_generated_files(zip_result["files"])
 
         project_name = schema.get("_meta", {}).get("project_name", "project")
         template_id = schema.get("_meta", {}).get("template_id", "template")
 
-        zip_filename = f"{project_name}_{template_id}_{date}.zip"
+        zip_filename = f"{project_name}_{template_id}_{runtime_config['date']}.zip"
 
         st.download_button(
             label="Download Lotes",
