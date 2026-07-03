@@ -244,26 +244,6 @@ def render_filename_preview(
     st.dataframe(preview_files, use_container_width=True)
 
 
-def render_generated_files(files: list[dict]) -> None:
-    if not files:
-        st.warning("Nenhum arquivo gerado.")
-        return
-
-    display_rows = []
-
-    for file in files:
-        display_rows.append(
-            {
-                "Arquivo": file["filename"],
-                "Qtd. Clientes": file["rows"],
-                "Lote": f"{file['batch_num']:02d}",
-                "Nº Arquivo": f"{file['file_num']:02d}",
-            }
-        )
-
-    st.dataframe(display_rows, use_container_width=True)
-
-
 def clear_zip_if_generation_changed(generation_key: dict) -> None:
     if st.session_state.get("generation_key") != generation_key:
         st.session_state.pop("zip_result", None)
