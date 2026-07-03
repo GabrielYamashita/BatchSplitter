@@ -17,7 +17,7 @@ def main():
 
     assert recovery_template["id"] == "cobranca_varejo_11"
     assert recovery_template["name"] == "cobranca_varejo_11"
-    assert recovery_template["output"]["file_prefix"] == "COBRANCA_VAREJOA_11"
+    assert recovery_template["output"]["file_prefix"] == "COBRANCA_VAREJO_11"
 
     print("Loader OK\n")
     print("Afinz project:")

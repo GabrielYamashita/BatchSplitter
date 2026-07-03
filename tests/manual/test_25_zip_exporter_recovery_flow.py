@@ -3,7 +3,6 @@ import zipfile
 from pprint import pprint
 
 import pandas as pd
-
 from core.batching.planner import build_batch_plan
 from core.batching.summarizer import summarize_batch_plan
 from core.export.zip_exporter import export_batches_to_zip
@@ -76,18 +75,18 @@ def main():
     files = zip_result["files"]
 
     assert [file["filename"] for file in files] == [
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_01_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_02_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_03_0307.csv",
     ]
     assert [file["rows"] for file in files] == [1000, 1000, 501]
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zip_file:
         names = zip_file.namelist()
         assert names == [
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_01_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_02_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_03_0307.csv",
         ]
 
         third_file = pd.read_csv(

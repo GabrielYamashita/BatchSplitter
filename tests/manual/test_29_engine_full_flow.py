@@ -29,14 +29,10 @@ def main():
 
     schema = template_result["schema"]
 
-    lines = [
-        "NrCpfCnpj;FirstName;IdCaso;NrTelefoneCompleto;DsCarteiraAjustada;DsSquad"
-    ]
+    lines = ["NrCpfCnpj;FirstName;IdCaso;NrTelefoneCompleto;DsCarteiraAjustada;DsSquad"]
 
     for i in range(2501):
-        lines.append(
-            f"{i:011d};Cliente {i};CASO{i:04d};0119{i:08d};Carteira A;Squad 1"
-        )
+        lines.append(f"{i:011d};Cliente {i};CASO{i:04d};0119{i:08d};Carteira A;Squad 1")
 
     csv_content = "\n".join(lines).encode("utf-8")
     uploaded_file = NamedBytesIO(csv_content, "clientes.csv")
@@ -99,18 +95,18 @@ def main():
     zip_bytes = zip_result["zip_bytes"]
 
     assert [file["filename"] for file in files] == [
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
-        "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_01_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_02_0307.csv",
+        "Recovery_COBRANCA_VAREJO_11_Lote05_03_0307.csv",
     ]
     assert [file["rows"] for file in files] == [1000, 1000, 501]
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zip_file:
         names = zip_file.namelist()
         assert names == [
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
-            "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_01_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_02_0307.csv",
+            "Recovery_COBRANCA_VAREJO_11_Lote05_03_0307.csv",
         ]
 
         first_file = pd.read_csv(

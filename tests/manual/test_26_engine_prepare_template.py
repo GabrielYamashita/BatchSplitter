@@ -14,7 +14,7 @@ def main():
 
     assert schema["_meta"]["project_id"] == "recovery"
     assert schema["_meta"]["template_id"] == "cobranca_varejo_11"
-    assert schema["output"]["file_prefix"] == "COBRANCA_VAREJOA_11"
+    assert schema["output"]["file_prefix"] == "COBRANCA_VAREJO_11"
 
     expected_fields = {
         "nome",

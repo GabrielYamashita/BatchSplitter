@@ -586,13 +586,10 @@ def main() -> None:
     if zip_result:
         st.success("Lotes gerados com sucesso.")
 
-        # st.subheader("Arquivos gerados")
-        # render_generated_files(zip_result["files"])
-
         project_name = schema.get("_meta", {}).get("project_name", "project")
-        template_id = schema.get("_meta", {}).get("template_id", "template")
+        file_prefix = schema.get("output", {}).get("file_prefix", "template")
 
-        zip_filename = f"{project_name}_{template_id}_{runtime_config['date']}.zip"
+        zip_filename = f"{project_name}_{file_prefix}_{runtime_config['date']}.zip"
 
         st.download_button(
             label="Download Lotes",
