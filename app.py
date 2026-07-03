@@ -153,12 +153,12 @@ def render_mapping_preview(mapping: dict, schema: dict) -> None:
             st.write(unmapped)
 
 
-def render_validation(validation: dict) -> None:
+def render_validation(validation: dict, label: str = "Mapeamento") -> None:
     if validation.get("valid"):
-        st.success("Mapeamento válido.")
+        st.success(f"{label} válido.")
         return
 
-    st.error("O mapeamento possui erros.")
+    st.error(f"{label} possui erros.")
 
     with st.expander("Erros de validação", expanded=True):
         st.json(validation.get("errors", []))
@@ -185,11 +185,6 @@ def build_manual_mapping_ui(
         return manual_mapping
 
     st.subheader("Mapeamento Manual")
-
-    st.warning(
-        "O mapeamento automático possui erros. "
-        "Revise os campos abaixo e selecione a coluna correta do CSV."
-    )
 
     options = [""] + csv_columns
 
@@ -219,6 +214,12 @@ def build_manual_mapping_ui(
 
         if selected_column:
             manual_mapping[field_key] = selected_column
+
+    if not manual_mapping:
+        st.warning(
+            "O mapeamento automático possui erros. "
+            "Revise os campos acima e selecione a coluna correta do CSV."
+        )
 
     return manual_mapping
 
@@ -455,7 +456,6 @@ def main() -> None:
     st.header("3. Mapeamento de Colunas")
 
     render_mapping_preview(mapping, schema)
-    render_validation(validation)
 
     csv_columns = list(df_clean.columns)
 
@@ -465,6 +465,9 @@ def main() -> None:
         schema=schema,
         csv_columns=csv_columns,
     )
+
+    if validation.get("valid"):
+        render_validation(validation, label="Mapeamento automático")
 
     # -----------------------------
     # Output build
@@ -485,6 +488,9 @@ def main() -> None:
             st.json(output_result["validation"].get("errors", []))
 
         st.stop()
+
+    if not validation.get("valid") and manual_mapping:
+        st.success("Mapeamento manual aplicado com sucesso.")
 
     df_output = output_result["df_output"]
     output_preview = output_result["output_preview"]
