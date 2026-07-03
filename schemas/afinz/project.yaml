@@ -49,3 +49,4 @@ fields:
       - phone
       - tel_deep
       - NrTelefoneCompleto
+      - fone
