@@ -12,7 +12,9 @@ def get_project_root() -> Path:
 
 def get_test_files(tests_dir: Path) -> list[Path]:
     return sorted(
-        file for file in tests_dir.glob("test_*.py") if file.name != "run_all.py"
+        file
+        for file in tests_dir.glob("test_*.py")
+        if file.name != "run_all.py"
     )
 
 

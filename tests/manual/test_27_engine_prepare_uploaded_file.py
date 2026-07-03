@@ -15,7 +15,7 @@ class NamedBytesIO(io.BytesIO):
 def main():
     template_result = prepare_template(
         project_schema_path="schemas/afinz/project.yaml",
-        template_schema_path="schemas/afinz/templates/cp_preventivo_03.yaml",
+        template_schema_path="schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     schema = template_result["schema"]
@@ -36,7 +36,6 @@ def main():
 
     assert result["read_info"]["delimiter"] == ";"
     assert result["cleaning_report"]["final_rows"] == 2
-
     assert result["input_preview"]["rows"] == 2
     assert result["input_preview"]["columns"] == [
         "Nome Cliente",
@@ -45,27 +44,20 @@ def main():
     ]
 
     mapping = result["mapping"]
-
     assert mapping["mapped"]["nome"] == "Nome Cliente"
     assert mapping["mapped"]["telefone"] == "Celular"
     assert mapping["missing_required"] == []
-
     assert result["validation"]["valid"] is True
 
     print("Engine Prepare Uploaded File OK\n")
-
     print("Read info:")
     pprint(result["read_info"])
-
     print("\nCleaning report:")
     pprint(result["cleaning_report"])
-
     print("\nMapping:")
     pprint(result["mapping"])
-
     print("\nValidation:")
     pprint(result["validation"])
-
     print("\nInput preview:")
     print(result["input_preview"]["sample"])
 

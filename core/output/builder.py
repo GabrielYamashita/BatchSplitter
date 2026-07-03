@@ -16,6 +16,19 @@ def get_active_fields(schema: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def build_source_column_to_field(mapping: dict[str, Any]) -> dict[str, str]:
+    """
+    Converts:
+    {
+        "nome": "Nome Cliente",
+        "telefone": "Celular"
+    }
+
+    Into:
+    {
+        "Nome Cliente": "nome",
+        "Celular": "telefone"
+    }
+    """
     mapped = mapping.get("mapped", {})
 
     return {source_column: field_key for field_key, source_column in mapped.items()}
@@ -32,6 +45,7 @@ def build_output_dataframe(
     Rules:
     - Output column order follows the uploaded CSV order.
     - Mapped columns are renamed to field.output_name.
+    - Mapped columns with the same input/output name are tracked separately.
     - Unmapped columns are kept with their original names.
     - Fields with enabled:false are not mapped, but raw CSV columns are still kept.
     """
@@ -41,17 +55,14 @@ def build_output_dataframe(
     output = pd.DataFrame()
 
     renamed_columns: dict[str, str] = {}
+    mapped_unchanged_columns: list[str] = []
     kept_unmapped_columns: list[str] = []
 
     for source_column in df.columns:
         field_key = source_column_to_field.get(source_column)
+        field_config = fields.get(field_key) if field_key else None
 
-        if field_key:
-            field_config = fields.get(field_key)
-
-            if not field_config:
-                continue
-
+        if field_key and field_config:
             output_name = field_config.get("output_name")
 
             if not output_name:
@@ -61,7 +72,12 @@ def build_output_dataframe(
                 raise ValueError(f"Duplicate output column generated: {output_name}")
 
             output[output_name] = df[source_column]
-            renamed_columns[source_column] = output_name
+
+            if source_column == output_name:
+                mapped_unchanged_columns.append(source_column)
+            else:
+                renamed_columns[source_column] = output_name
+
             continue
 
         if source_column in output.columns:
@@ -76,6 +92,7 @@ def build_output_dataframe(
             "input_columns": list(df.columns),
             "output_columns": list(output.columns),
             "renamed_columns": renamed_columns,
+            "mapped_unchanged_columns": mapped_unchanged_columns,
             "kept_unmapped_columns": kept_unmapped_columns,
             "input_rows": len(df),
             "output_rows": len(output),

@@ -10,7 +10,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df = pd.DataFrame({"nome": [str(i) for i in range(2501)]})
@@ -24,11 +24,9 @@ def main():
 
     plan = build_batch_plan(df, schema, runtime_config)
     summary = summarize_batch_plan(plan)
-
     rows = [batch["rows"] for batch in plan]
 
     assert rows == [1000, 1000, 501]
-
     assert plan == [
         {
             "batch_num": 5,
@@ -52,7 +50,6 @@ def main():
             "rows": 501,
         },
     ]
-
     assert summary["summary"] == "2 Lotes de 1000 + 1 Lote de 501"
     assert summary["total_batches"] == 3
     assert summary["total_rows"] == 2501

@@ -9,7 +9,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df = pd.DataFrame({"nome": [str(i) for i in range(9500)]})
@@ -21,11 +21,9 @@ def main():
     }
 
     plan = build_batch_plan(df, schema, runtime_config)
-
     rows = [batch["rows"] for batch in plan]
 
     assert len(plan) == 10
-
     assert rows == [
         1000,
         1000,
@@ -38,7 +36,6 @@ def main():
         1000,
         500,
     ]
-
     assert plan[-1] == {
         "batch_num": 5,
         "file_num": 10,

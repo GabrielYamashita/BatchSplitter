@@ -23,16 +23,20 @@ class NamedBytesIO(io.BytesIO):
 
 def main():
     template_result = prepare_template(
-        project_schema_path="schemas/afinz/project.yaml",
-        template_schema_path="schemas/afinz/templates/cp_preventivo_03.yaml",
+        project_schema_path="schemas/recovery/project.yaml",
+        template_schema_path="schemas/recovery/templates/cobranca_varejo_11.yaml",
     )
 
     schema = template_result["schema"]
 
-    lines = ["Nome Cliente;Celular;CPF"]
+    lines = [
+        "NrCpfCnpj;FirstName;IdCaso;NrTelefoneCompleto;DsCarteiraAjustada;DsSquad"
+    ]
 
     for i in range(2501):
-        lines.append(f"Cliente {i};0119{i:08d};{i:011d}")
+        lines.append(
+            f"{i:011d};Cliente {i};CASO{i:04d};0119{i:08d};Carteira A;Squad 1"
+        )
 
     csv_content = "\n".join(lines).encode("utf-8")
     uploaded_file = NamedBytesIO(csv_content, "clientes.csv")
@@ -55,9 +59,16 @@ def main():
     df_output = output_result["df_output"]
     output_report = output_result["output_result"]["report"]
 
-    assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
+    assert list(df_output.columns) == [
+        "CPF",
+        "nome",
+        "IdCaso",
+        "TEL_DEEP",
+        "DsCarteiraAjustada",
+        "DsSquad",
+    ]
     assert len(df_output) == 2501
-    assert output_report["kept_unmapped_columns"] == ["CPF"]
+    assert output_report["kept_unmapped_columns"] == []
 
     runtime_config = {
         "batch_size": 1000,
@@ -88,20 +99,18 @@ def main():
     zip_bytes = zip_result["zip_bytes"]
 
     assert [file["filename"] for file in files] == [
-        "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
-        "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
-        "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
     ]
-
     assert [file["rows"] for file in files] == [1000, 1000, 501]
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zip_file:
         names = zip_file.namelist()
-
         assert names == [
-            "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
-            "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
-            "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
         ]
 
         first_file = pd.read_csv(
@@ -111,14 +120,19 @@ def main():
             keep_default_na=False,
         )
 
-        assert list(first_file.columns) == ["nome", "TEL_DEEP", "CPF"]
+        assert list(first_file.columns) == [
+            "CPF",
+            "nome",
+            "IdCaso",
+            "TEL_DEEP",
+            "DsCarteiraAjustada",
+            "DsSquad",
+        ]
         assert len(first_file) == 1000
 
     print("Engine Full Flow OK\n")
-
     print("Batch summary:")
     pprint(batch_summary)
-
     print("\nGenerated files:")
     pprint(files)
 

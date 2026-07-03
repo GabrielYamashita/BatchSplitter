@@ -4,25 +4,26 @@ from core.schemas.loader import load_yaml
 
 
 def main():
-    project = load_yaml("schemas/afinz/project.yaml")
-    template = load_yaml("schemas/afinz/templates/cp_preventivo_03.yaml")
+    afinz_project = load_yaml("schemas/afinz/project.yaml")
+    recovery_template = load_yaml(
+        "schemas/recovery/templates/cobranca_varejo_11.yaml"
+    )
 
-    assert isinstance(project, dict)
-    assert isinstance(template, dict)
+    assert isinstance(afinz_project, dict)
+    assert isinstance(recovery_template, dict)
 
-    assert project["id"] == "afinz"
-    assert project["name"] == "Afinz"
+    assert afinz_project["id"] == "afinz"
+    assert afinz_project["name"] == "Afinz"
 
-    assert template["id"] == "cp_preventivo_03"
-    assert template["name"] == "cp_preventivo_03"
+    assert recovery_template["id"] == "cobranca_varejo_11"
+    assert recovery_template["name"] == "cobranca_varejo_11"
+    assert recovery_template["output"]["file_prefix"] == "COBRANCA_VAREJOA_11"
 
     print("Loader OK\n")
-
-    print("Project:")
-    pprint(project)
-
-    print("\nTemplate:")
-    pprint(template)
+    print("Afinz project:")
+    pprint(afinz_project)
+    print("\nRecovery template:")
+    pprint(recovery_template)
 
 
 if __name__ == "__main__":

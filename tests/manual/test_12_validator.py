@@ -10,44 +10,43 @@ from core.validation.validator import validate_mapping
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
-    df_valid = pd.DataFrame(
+    valid_df = pd.DataFrame(
         {
-            "nome": ["Gabriel", "Yama"],
-            "telefone": ["011999999999", "011988888888"],
+            "Nome Cliente": ["Gabriel"],
+            "Celular": ["011999999999"],
         }
     )
 
-    mapping_valid = auto_map_columns(df_valid, schema)
-    validation_valid = validate_mapping(mapping_valid, schema)
+    valid_mapping = auto_map_columns(valid_df, schema)
+    valid_result = validate_mapping(valid_mapping, schema)
 
-    assert validation_valid["valid"] is True
-    assert validation_valid["errors"] == []
+    assert valid_result["valid"] is True
+    assert valid_result["errors"] == []
 
-    df_invalid = pd.DataFrame(
+    invalid_df = pd.DataFrame(
         {
-            "nome": ["Gabriel", "Yama"],
+            "Nome Cliente": ["Gabriel"],
         }
     )
 
-    mapping_invalid = auto_map_columns(df_invalid, schema)
-    validation_invalid = validate_mapping(mapping_invalid, schema)
+    invalid_mapping = auto_map_columns(invalid_df, schema)
+    invalid_result = validate_mapping(invalid_mapping, schema)
 
-    assert validation_invalid["valid"] is False
+    assert invalid_result["valid"] is False
     assert any(
-        error["type"] == "missing_required_field" and error["field"] == "telefone"
-        for error in validation_invalid["errors"]
+        error["type"] == "missing_required_field"
+        and error["field"] == "telefone"
+        for error in invalid_result["errors"]
     )
 
     print("Validator OK\n")
-
-    print("Valid mapping:")
-    pprint(validation_valid)
-
-    print("\nInvalid mapping:")
-    pprint(validation_invalid)
+    print("Valid result:")
+    pprint(valid_result)
+    print("\nInvalid result:")
+    pprint(invalid_result)
 
 
 if __name__ == "__main__":

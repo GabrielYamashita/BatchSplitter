@@ -19,7 +19,7 @@ class NamedBytesIO(io.BytesIO):
 def main():
     template_result = prepare_template(
         project_schema_path="schemas/afinz/project.yaml",
-        template_schema_path="schemas/afinz/templates/cp_preventivo_03.yaml",
+        template_schema_path="schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     schema = template_result["schema"]
@@ -60,7 +60,6 @@ def main():
 
     assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
     assert len(df_output) == 2
-
     assert output_report["kept_unmapped_columns"] == ["CPF"]
 
     assert df_output.loc[0, "nome"] == "Gabriel"
@@ -68,13 +67,10 @@ def main():
     assert df_output.loc[0, "CPF"] == "01234567890"
 
     print("Engine Manual Mapping Output OK\n")
-
     print("Final mapping:")
     pprint(output_result["mapping"])
-
     print("\nOutput report:")
     pprint(output_report)
-
     print("\nOutput preview:")
     print(output_result["output_preview"]["sample"])
 

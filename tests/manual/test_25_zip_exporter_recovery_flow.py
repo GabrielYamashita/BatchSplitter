@@ -15,21 +15,23 @@ from core.validation.validator import validate_mapping
 
 def main():
     schema = resolve_schema(
-        "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/recovery/project.yaml",
+        "schemas/recovery/templates/cobranca_varejo_11.yaml",
     )
 
     df_clean = pd.DataFrame(
         {
-            "Nome Cliente": [f"Cliente {i}" for i in range(2501)],
-            "Celular": [f"0119{i:08d}" for i in range(2501)],
-            "CPF": [f"{i:011d}" for i in range(2501)],
+            "NrCpfCnpj": [f"{i:011d}" for i in range(2501)],
+            "FirstName": [f"Cliente {i}" for i in range(2501)],
+            "IdCaso": [f"CASO{i:04d}" for i in range(2501)],
+            "NrTelefoneCompleto": [f"0119{i:08d}" for i in range(2501)],
+            "DsCarteiraAjustada": ["Carteira A" for _ in range(2501)],
+            "DsSquad": ["Squad 1" for _ in range(2501)],
         }
     )
 
     mapping = auto_map_columns(df_clean, schema)
     validation = validate_mapping(mapping, schema)
-
     assert validation["valid"] is True
 
     output_result = build_output_dataframe(
@@ -41,9 +43,16 @@ def main():
     df_output = output_result["df"]
     output_report = output_result["report"]
 
-    assert list(df_output.columns) == ["nome", "TEL_DEEP", "CPF"]
+    assert list(df_output.columns) == [
+        "CPF",
+        "nome",
+        "IdCaso",
+        "TEL_DEEP",
+        "DsCarteiraAjustada",
+        "DsSquad",
+    ]
     assert len(df_output) == 2501
-    assert output_report["kept_unmapped_columns"] == ["CPF"]
+    assert output_report["kept_unmapped_columns"] == []
 
     runtime_config = {
         "batch_size": 1000,
@@ -54,7 +63,6 @@ def main():
 
     batch_plan = build_batch_plan(df_output, schema, runtime_config)
     batch_summary = summarize_batch_plan(batch_plan)
-
     assert batch_summary["summary"] == "2 Lotes de 1000 + 1 Lote de 501"
 
     zip_result = export_batches_to_zip(
@@ -68,20 +76,18 @@ def main():
     files = zip_result["files"]
 
     assert [file["filename"] for file in files] == [
-        "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
-        "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
-        "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
+        "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
     ]
-
     assert [file["rows"] for file in files] == [1000, 1000, 501]
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zip_file:
         names = zip_file.namelist()
-
         assert names == [
-            "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
-            "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
-            "Afinz_CP_PREVENTIVO_03_Lote05_03_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_01_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_02_0307.csv",
+            "Recovery_COBRANCA_VAREJOA_11_Lote05_03_0307.csv",
         ]
 
         third_file = pd.read_csv(
@@ -92,13 +98,18 @@ def main():
         )
 
         assert len(third_file) == 501
-        assert list(third_file.columns) == ["nome", "TEL_DEEP", "CPF"]
+        assert list(third_file.columns) == [
+            "CPF",
+            "nome",
+            "IdCaso",
+            "TEL_DEEP",
+            "DsCarteiraAjustada",
+            "DsSquad",
+        ]
 
-    print("ZIP Exporter Real Flow OK\n")
-
+    print("ZIP Exporter Recovery Flow OK\n")
     print("Batch summary:")
     pprint(batch_summary)
-
     print("\nFiles:")
     pprint(files)
 

@@ -23,7 +23,6 @@ def main():
     assert len(preview["sample"]) == 2
 
     print("DataFrame Preview OK\n")
-
     pprint(
         {
             "rows": preview["rows"],
@@ -31,7 +30,6 @@ def main():
             "columns": preview["columns"],
         }
     )
-
     print("\nSample:")
     print(preview["sample"])
 

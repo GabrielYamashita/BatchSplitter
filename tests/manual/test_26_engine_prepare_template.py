@@ -5,28 +5,36 @@ from core.engine import prepare_template
 
 def main():
     result = prepare_template(
-        project_schema_path="schemas/afinz/project.yaml",
-        template_schema_path="schemas/afinz/templates/cp_preventivo_03.yaml",
+        project_schema_path="schemas/recovery/project.yaml",
+        template_schema_path="schemas/recovery/templates/cobranca_varejo_11.yaml",
     )
 
     schema = result["schema"]
     preview = result["schema_preview"]
 
-    assert schema["_meta"]["project_id"] == "afinz"
-    assert schema["_meta"]["template_id"] == "cp_preventivo_03"
+    assert schema["_meta"]["project_id"] == "recovery"
+    assert schema["_meta"]["template_id"] == "cobranca_varejo_11"
+    assert schema["output"]["file_prefix"] == "COBRANCA_VAREJOA_11"
 
-    assert "nome" in schema["fields"]
-    assert "telefone" in schema["fields"]
+    expected_fields = {
+        "nome",
+        "telefone",
+        "cpf",
+        "id_caso",
+        "ds_carteira_ajustada",
+        "ds_squad",
+    }
+    assert expected_fields == set(schema["fields"].keys())
 
-    assert schema["output"]["file_prefix"] == "CP_PREVENTIVO_03"
-
-    assert preview["project_id"] == "afinz"
-    assert preview["template_id"] == "cp_preventivo_03"
-
-    output_names = [field["output_name"] for field in preview["fields"]]
-
-    assert "nome" in output_names
-    assert "TEL_DEEP" in output_names
+    output_names = {field["output_name"] for field in preview["fields"]}
+    assert {
+        "nome",
+        "TEL_DEEP",
+        "CPF",
+        "IdCaso",
+        "DsCarteiraAjustada",
+        "DsSquad",
+    }.issubset(output_names)
 
     print("Engine Prepare Template OK\n")
     pprint(preview)

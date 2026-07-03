@@ -8,6 +8,7 @@ def main():
     assert normalize_name("TEL_DEEP") == "tel_deep"
     assert normalize_name("Data de Vencimento") == "data_de_vencimento"
     assert normalize_name("João") == "joao"
+    assert normalize_name("NrTelefoneCompleto") == "nrtelefonecompleto"
 
     print("Normalizer OK")
 

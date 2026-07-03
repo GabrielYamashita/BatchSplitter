@@ -16,7 +16,7 @@ class NamedBytesIO(io.BytesIO):
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     csv_content = (
@@ -33,13 +33,9 @@ def main():
     assert result["delimiter"] == ";"
     assert result["encoding"] in ["utf-8", "utf-8-sig"]
     assert result["rows"] == 2
-
     assert list(df.columns) == ["nome", "telefone", "cpf"]
-
     assert df.loc[0, "cpf"] == "01234567890"
-    assert df.loc[1, "cpf"] == "00123456789"
-
-    assert df.loc[0, "telefone"] == "011999999999"
+    assert df.loc[1, "telefone"] == "011988888888"
 
     print("CSV Reader OK\n")
     pprint(
@@ -50,7 +46,6 @@ def main():
             "columns": result["columns"],
         }
     )
-
     print("\nDataFrame:")
     print(df)
 

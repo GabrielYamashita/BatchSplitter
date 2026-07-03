@@ -9,7 +9,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df = pd.DataFrame(
@@ -24,7 +24,6 @@ def main():
 
     assert mapping["mapped"]["nome"] == "Nome Cliente"
     assert mapping["mapped"]["telefone"] == "Celular"
-
     assert mapping["missing_required"] == []
     assert "Observação" in mapping["unmapped_columns"]
     assert mapping["conflicts"] == []

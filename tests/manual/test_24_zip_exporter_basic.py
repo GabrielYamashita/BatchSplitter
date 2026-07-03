@@ -12,7 +12,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df_output = pd.DataFrame(
@@ -43,16 +43,15 @@ def main():
 
     assert isinstance(zip_bytes, bytes)
     assert len(zip_bytes) > 0
-
     assert files == [
         {
-            "filename": "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
+            "filename": "Afinz_PENDENCIA_MAIOR_60_Lote05_01_0307.csv",
             "rows": 2,
             "batch_num": 5,
             "file_num": 1,
         },
         {
-            "filename": "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
+            "filename": "Afinz_PENDENCIA_MAIOR_60_Lote05_02_0307.csv",
             "rows": 1,
             "batch_num": 5,
             "file_num": 2,
@@ -61,10 +60,9 @@ def main():
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zip_file:
         names = zip_file.namelist()
-
         assert names == [
-            "Afinz_CP_PREVENTIVO_03_Lote05_01_0307.csv",
-            "Afinz_CP_PREVENTIVO_03_Lote05_02_0307.csv",
+            "Afinz_PENDENCIA_MAIOR_60_Lote05_01_0307.csv",
+            "Afinz_PENDENCIA_MAIOR_60_Lote05_02_0307.csv",
         ]
 
         first_file_bytes = zip_file.read(names[0])
@@ -81,7 +79,6 @@ def main():
         assert first_df.loc[0, "TEL_DEEP"] == "011999999999"
 
     print("ZIP Exporter Basic OK\n")
-
     print("Files:")
     pprint(files)
 

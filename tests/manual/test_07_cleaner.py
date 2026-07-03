@@ -11,7 +11,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df = pd.DataFrame(
@@ -24,13 +24,11 @@ def main():
     )
 
     result = clean_dataframe(df, schema)
-
     cleaned = result["df"]
     report = result["report"]
 
     assert "Unnamed: 0" not in cleaned.columns
     assert "empty_col" not in cleaned.columns
-
     assert list(cleaned.columns) == ["nome", "telefone"]
     assert len(cleaned) == 2
 
@@ -41,10 +39,8 @@ def main():
     assert "empty_col" in report["dropped_empty_columns"]
 
     print("Cleaner OK\n")
-
     print("Report:")
     pprint(report)
-
     print("\nCleaned DataFrame:")
     print(cleaned)
 

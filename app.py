@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
@@ -14,6 +15,7 @@ from core.engine import (
 from core.export.zip_exporter import render_filename
 from core.schemas.discovery import list_projects, list_templates
 
+APP_TIMEZONE = "America/Sao_Paulo"
 SCHEMA_ROOT = "schemas"
 
 
@@ -68,7 +70,8 @@ def render_logout_button() -> None:
 
 
 def default_tomorrow_date():
-    return (datetime.now() + timedelta(days=1)).date()
+    now = datetime.now(ZoneInfo(APP_TIMEZONE))
+    return (now + timedelta(days=1)).date()
 
 
 def format_date_ddmm(value) -> str:

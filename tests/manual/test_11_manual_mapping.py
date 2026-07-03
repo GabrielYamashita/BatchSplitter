@@ -10,7 +10,7 @@ from core.schemas.resolver import resolve_schema
 def main():
     schema = resolve_schema(
         "schemas/afinz/project.yaml",
-        "schemas/afinz/templates/cp_preventivo_03.yaml",
+        "schemas/afinz/templates/informar_pendencia_maior_60.yaml",
     )
 
     df = pd.DataFrame(
@@ -38,8 +38,9 @@ def main():
 
     assert updated_mapping["mapped"]["telefone"] == "Fone Principal"
     assert updated_mapping["missing_required"] == []
+    assert "Fone Principal" not in updated_mapping["unmapped_columns"]
 
-    print("Manual Mapping OK\n")
+    print("Manual Mapper OK\n")
     pprint(updated_mapping)
 
 

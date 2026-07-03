@@ -1,0 +1,19 @@
+id: override
+name: Override Template
+active: true
+
+output:
+  file_prefix: OVERRIDE
+
+fields:
+  nome:
+    enabled: false
+
+  telefone:
+    required: true
+    output_name: WHATSAPP
+    aliases:
+      - telefone
+      - celular
+      - whatsapp
+      - phone
