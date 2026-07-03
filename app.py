@@ -17,6 +17,56 @@ from core.schemas.discovery import list_projects, list_templates
 SCHEMA_ROOT = "schemas"
 
 
+def check_password() -> bool:
+    expected_password = st.secrets.get("APP_PASSWORD")
+
+    if not expected_password:
+        st.error("Senha do app não configurada.")
+        st.caption("Configure APP_PASSWORD nos secrets do Streamlit.")
+        st.stop()
+
+    if st.session_state.get("authenticated") is True:
+        return True
+
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+
+    with col2:
+        st.title("🔒 Acesso Restrito")
+        st.caption("Digite a senha para acessar o Batch Splitter.")
+
+        with st.form("login_form"):
+            password = st.text_input(
+                "Senha",
+                type="password",
+                placeholder="Digite a senha de acesso",
+            )
+
+            submitted = st.form_submit_button(
+                "Entrar",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if submitted:
+            if password == expected_password:
+                st.session_state["authenticated"] = True
+                st.rerun()
+
+            st.error("Senha incorreta.")
+
+    st.stop()
+
+
+def render_logout_button() -> None:
+    st.sidebar.divider()
+
+    if st.sidebar.button("Sair"):
+        for key in list(st.session_state.keys()):
+            st.session_state.pop(key, None)
+
+        st.rerun()
+
+
 def default_tomorrow_date():
     return (datetime.now() + timedelta(days=1)).date()
 
@@ -223,6 +273,8 @@ def main() -> None:
         layout="wide",
     )
 
+    check_password()
+
     st.title("📦 Batch Splitter")
     st.caption("Separador de bases de acionamento - 1Digital")
 
@@ -333,6 +385,8 @@ def main() -> None:
         for error in runtime_errors:
             st.sidebar.error(error)
 
+    render_logout_button()
+
     # -----------------------------
     # Upload
     # -----------------------------
@@ -385,7 +439,7 @@ def main() -> None:
     with col3:
         st.metric("Separador", read_info["delimiter"])
 
-    with st.expander("Relatório de Limpeza", expanded=False):
+    with st.expander("Relatório de Limpeza da Base", expanded=False):
         st.json(cleaning_report)
 
     st.dataframe(input_preview["sample"], use_container_width=True)
@@ -402,11 +456,6 @@ def main() -> None:
 
     csv_columns = list(df_clean.columns)
 
-    # manual_mapping = build_manual_mapping_ui(
-    #     missing_required=mapping.get("missing_required", []),
-    #     schema=schema,
-    #     csv_columns=csv_columns,
-    # )
     manual_mapping = build_manual_mapping_ui(
         mapping=mapping,
         validation=validation,
