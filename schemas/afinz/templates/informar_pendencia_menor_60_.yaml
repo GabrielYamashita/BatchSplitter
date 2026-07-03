@@ -1,0 +1,6 @@
+id: informar_pendencia_menor_60_
+name: informar_pendencia_menor_60_
+active: true
+
+output:
+  file_prefix: PENDENCIA_MENOR_60

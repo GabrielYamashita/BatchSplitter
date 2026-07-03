@@ -1,0 +1,36 @@
+id: cobranca_varejo_11
+name: cobranca_varejo_11
+active: true
+
+output:
+  file_prefix: COBRANCA_VAREJOA_11
+
+fields:
+  cpf:
+    required: true
+    output_name: CPF
+    aliases:
+      - cpf
+      - cnpj
+      - cpf_cnpj
+      - document
+      - doc
+      - NrCpfCnpj
+
+  id_caso:
+    required: true
+    output_name: IdCaso
+    aliases:
+      - id_caso
+
+  ds_carteira_ajustada:
+    required: true
+    output_name: DsCarteiraAjustada
+    aliases:
+      - ds_carteira_ajustada
+
+  ds_squad:
+    required: true
+    output_name: DsSquad
+    aliases:
+      - ds_squad

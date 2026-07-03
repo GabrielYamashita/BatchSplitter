@@ -1,5 +1,5 @@
-id: afinz
-name: Afinz
+id: recovery
+name: Recovery
 active: true
 
 input:
@@ -28,7 +28,7 @@ output:
   filename_pattern: "{name}_{prefix}_Lote{batch_num}_{file_num}_{date}.csv"
 
 fields:
-  nome: # column name
+  nome:
     required: true
     output_name: nome
     aliases:
@@ -39,7 +39,7 @@ fields:
       - first_name
       - FirstName
 
-  telefone: # column name
+  telefone:
     required: true
     output_name: TEL_DEEP
     aliases:

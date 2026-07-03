@@ -1,6 +1,0 @@
-id: cp_preventivo_04
-name: cp_preventivo_04
-active: true
-
-output:
-  file_prefix: CP_PREVENTIVO_04

@@ -1,0 +1,6 @@
+id: informar_pendencia_maior_60
+name: informar_pendencia_maior_60
+active: true
+
+output:
+  file_prefix: PENDENCIA_MAIOR_60
