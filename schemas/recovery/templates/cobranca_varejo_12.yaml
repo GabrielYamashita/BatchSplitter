@@ -3,7 +3,7 @@ name: cobranca_varejo_12
 active: true
 
 output:
-  file_prefix: COBRANCA_VAREJOA_12
+  file_prefix: COBRANCA_VAREJO_12
 
 fields:
   cpf:

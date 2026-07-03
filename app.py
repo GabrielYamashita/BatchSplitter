@@ -586,8 +586,8 @@ def main() -> None:
     if zip_result:
         st.success("Lotes gerados com sucesso.")
 
-        st.subheader("Arquivos gerados")
-        render_generated_files(zip_result["files"])
+        # st.subheader("Arquivos gerados")
+        # render_generated_files(zip_result["files"])
 
         project_name = schema.get("_meta", {}).get("project_name", "project")
         template_id = schema.get("_meta", {}).get("template_id", "template")
