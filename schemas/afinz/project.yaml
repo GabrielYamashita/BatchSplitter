@@ -38,6 +38,8 @@ fields:
       - name
       - first_name
       - FirstName
+    transforms:
+      - title_case_name
 
   telefone: # column name
     required: true
@@ -50,3 +52,4 @@ fields:
       - tel_deep
       - NrTelefoneCompleto
       - fone
+

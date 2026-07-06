@@ -12,6 +12,7 @@ from core.io.csv_reader import read_csv_auto
 from core.mapping.manual import apply_manual_mapping
 from core.mapping.mapper import auto_map_columns
 from core.output.builder import build_output_dataframe
+from core.output.transforms import apply_output_transforms
 from core.preprocessing.cleaner import clean_dataframe
 from core.preview.dataframe_preview import build_dataframe_preview
 from core.schemas.resolver import resolve_schema
@@ -143,6 +144,11 @@ def apply_mapping_and_build_output(
     )
 
     df_output = output_result["df"]
+
+    df_output = apply_output_transforms(
+        df=df_output,
+        schema=schema,
+    )
 
     output_preview = build_dataframe_preview(
         df_output,

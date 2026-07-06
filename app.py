@@ -46,7 +46,7 @@ def check_password() -> bool:
             submitted = st.form_submit_button(
                 "Entrar",
                 type="primary",
-                use_container_width=True,
+                width="stretch",
             )
 
         if submitted:
@@ -123,7 +123,7 @@ def render_schema_preview(schema_preview: dict) -> None:
             for field in schema_preview.get("fields", [])
         ]
 
-        st.dataframe(fields_preview, use_container_width=True)
+        st.dataframe(fields_preview, width="stretch")
 
 
 def render_mapping_preview(mapping: dict, schema: dict) -> None:
@@ -142,7 +142,7 @@ def render_mapping_preview(mapping: dict, schema: dict) -> None:
         )
 
     if mapped_rows:
-        st.dataframe(mapped_rows, use_container_width=True)
+        st.dataframe(mapped_rows, width="stretch")
     else:
         st.warning("Nenhum campo foi mapeado automaticamente.")
 
@@ -241,7 +241,7 @@ def render_filename_preview(
         for batch in batch_plan
     ]
 
-    st.dataframe(preview_files, use_container_width=True)
+    st.dataframe(preview_files, width="stretch")
 
 
 def clear_zip_if_generation_changed(generation_key: dict) -> None:
@@ -426,7 +426,7 @@ def main() -> None:
     with st.expander("Relatório de Limpeza da Base", expanded=False):
         st.json(cleaning_report)
 
-    st.dataframe(input_preview["sample"], use_container_width=True)
+    st.dataframe(input_preview["sample"], width="stretch")
 
     # -----------------------------
     # Mapping
@@ -490,7 +490,7 @@ def main() -> None:
     with st.expander("Relatório de Saída", expanded=False):
         st.json(output_report)
 
-    st.dataframe(output_preview["sample"], use_container_width=True)
+    st.dataframe(output_preview["sample"], width="stretch")
 
     # -----------------------------
     # Batch preview

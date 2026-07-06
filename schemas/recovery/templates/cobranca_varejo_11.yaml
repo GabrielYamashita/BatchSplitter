@@ -16,6 +16,8 @@ fields:
       - document
       - doc
       - NrCpfCnpj
+    transforms:
+      - cpf_pad_left_preserve_format
 
   id_caso:
     required: true

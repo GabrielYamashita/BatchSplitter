@@ -38,6 +38,8 @@ fields:
       - name
       - first_name
       - FirstName
+    transforms:
+      - title_case_name
 
   telefone:
     required: true
