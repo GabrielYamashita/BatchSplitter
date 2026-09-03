@@ -1,0 +1,6 @@
+id: cobranca_varejo_06
+name: cobranca_varejo_06
+active: true
+
+output:
+  file_prefix: COBRANCA_VAREJO_06
